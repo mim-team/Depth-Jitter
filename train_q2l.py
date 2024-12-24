@@ -17,7 +17,7 @@ param_dict = {
     "num_encoders":2,
     "num_decoders":3,
     "num_heads":8,
-    "batch_size":768,
+    "batch_size":512,
     "image_dim":384,
     "learning_rate":1e-4,
     "momentum":0.9,
@@ -41,7 +41,7 @@ seathru_transform = SeaThruAugmentation(image_folder, depth_image_folder, depth_
 coco = COCODataModule(
     data_dir="/home/mundus/mrahman528/projects/mir/depth_jitter/fathomnet_2023_dataset",
     img_size=384,
-    batch_size=768,
+    batch_size=512,
     num_workers=8,  # Adjust based on CPU cores
     use_cutmix=True,
     cutmix_alpha=1.0,
