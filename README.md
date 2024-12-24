@@ -11,21 +11,21 @@ Depth-Jitter is a project focused on augmenting image datasets with depth inform
 
 ## Project Structure
 
-.
-├── README.md \\
-├── assets \\
-│   └── project_video.mp4 \\
-├── parameters_train.json (seathru parameters) \\
-├── q2l_labeller \\
-│   ├── __init__.py \\
-│   ├── __pycache__ \\
-│   ├── data (contains custom augmentation file dataset.py) \\
-│   ├── loss_modules \\
-│   ├── models \\
-│   └── pl_modules \\
-├── simple-demo.ipynb (training notebook) \\
-├── train.json (annotaiton) \\
-├── train_q2l.py (training script) \\
-└── val.json (annotation) \\
-
+'''
+├── README.md
+├── assets
+│   └── project_video.mp4
+├── parameters_train.json (seathru parameters)
+├── q2l_labeller
+│   ├── __init__.py
+│   ├── __pycache__
+│   ├── data (contains custom augmentation file dataset.py)
+│   ├── loss_modules
+│   ├── models
+│   └── pl_modules
+├── simple-demo.ipynb (training notebook)
+├── train.json (annotaiton)
+├── train_q2l.py (training script)
+└── val.json (annotation)
+'''
 ## Usage
