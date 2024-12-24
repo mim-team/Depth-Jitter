@@ -11,7 +11,7 @@ Depth-Jitter is a project focused on augmenting image datasets with depth inform
 
 ## Project Structure
 
-'''
+```
 ├── README.md
 ├── assets
 │   └── project_video.mp4
@@ -27,5 +27,5 @@ Depth-Jitter is a project focused on augmenting image datasets with depth inform
 ├── train.json (annotaiton)
 ├── train_q2l.py (training script)
 └── val.json (annotation)
-'''
+```
 ## Usage
