@@ -29,3 +29,13 @@ Depth-Jitter is a project focused on augmenting image datasets with depth inform
 └── val.json (annotation)
 ```
 ## Usage
+### Create Conda Environment
+```
+conda env create -f environment.yml
+
+```
+### Activate Conda Environment
+```
+conda activate depth-jitter
+
+```
