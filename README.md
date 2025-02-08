@@ -1,9 +1,15 @@
 # Depth-Jitter
 
-<video width="320" height="240" controls>
-  <source src="/Users/mdsazidurrahman/Depth-Jitter/assets/project_video.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+### Underwater Image Formation Model
+<p align="center">
+  <img src="assets/seathru.png" alt="Alt Text" width="500"/>
+</p>
+
+### Depth Jitter 
+<p align="center">
+  <img src="assets/depth-jitter-white.png" alt="Alt Text" width="500"/>
+</p>
+
 
 ## Overview
 
