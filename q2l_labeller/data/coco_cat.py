@@ -7,7 +7,7 @@ class COCOCategorizer:
 
     def __init__(self):
         """Creates label code-name mapping"""
-        f = open("/home/mundus/mrahman528/thesis/query2label/q2l_labeller/data/coco-labels-2014-2017.txt")
+        f = open("/home/mundus/mrahman528/Depth-Jitter/q2l_labeller/data/fathomnet.txt")
         category_list = [line.rstrip("\n") for line in f]
         self.cat_dict = {cat: key for cat, key in enumerate(category_list)}
 

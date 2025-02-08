@@ -15,7 +15,7 @@ class Query2Label(nn.Module):
     """
     def __init__(
         self, model, conv_out, num_classes, hidden_dim=256, nheads=8, 
-        encoder_layers=6, decoder_layers=6, use_pos_encoding=False):
+        encoder_layers=2, decoder_layers=2, use_pos_encoding=False, dropout_rate=0.3):
         """Initializes model
 
         Args:
@@ -29,6 +29,7 @@ class Query2Label(nn.Module):
             decoder_layers (int, optional): Number of decoders. Defaults to 6.
             use_pos_encoding (bool, optional): Flag for use of position encoding. 
             Defaults to False.
+            dropout_rate (float, optional): Dropout rate for regularization. Defaults to 0.1.
         """        
         
         super().__init__()
@@ -39,8 +40,9 @@ class Query2Label(nn.Module):
 
         self.backbone = TimmBackbone(model)
         self.conv = nn.Conv2d(conv_out, hidden_dim, 1)
+        self.dropout = nn.Dropout(dropout_rate)  # Add dropout layer
         self.transformer = nn.Transformer(
-            hidden_dim, nheads, encoder_layers, decoder_layers)
+            hidden_dim, nheads, encoder_layers, decoder_layers, dropout=dropout_rate)
 
         if self.use_pos_encoding:
             # returns the encoding object
@@ -69,13 +71,13 @@ class Query2Label(nn.Module):
         
         # reduce number of feature planes for the transformer
         h = self.conv(out)
+        h = self.dropout(h)  # Apply dropout after the convolutional layer
         B, C, H, W = h.shape
 
         # add position encodings
         if self.use_pos_encoding:
-            
             # input with encoding added
-            h = self.encoding_adder(h*0.1)
+            h = self.encoding_adder(h * 0.1)
 
         # convert h from [N x C x H x W] to [H*W x N x C] (N=batch size)
         # this corresponds to the [SIZE x BATCH_SIZE x EMBED_DIM] dimensions 
@@ -89,18 +91,14 @@ class Query2Label(nn.Module):
         label_emb = label_emb.transpose(0, 1)
         h = self.transformer(h, label_emb).transpose(0, 1)
         
+        # Apply dropout after transformer output
+        h = self.dropout(h)
+        
         # output from transformer was of dim [TARGET x BATCH_SIZE x EMBED_SIZE];
         # however, we transposed it to [BATCH_SIZE x TARGET x EMBED_SIZE] above.
         # below we reshape to [BATCH_SIZE x TARGET*EMBED_SIZE].
         #
         # next, we project transformer outputs to class labels
-        h = torch.reshape(h,(B, self.num_classes * self.hidden_dim))
+        h = torch.reshape(h, (B, self.num_classes * self.hidden_dim))
 
         return self.classifier(h)
-        
-
-
-
-
-
-

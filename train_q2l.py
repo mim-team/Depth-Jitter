@@ -7,25 +7,28 @@ import torch
 from q2l_labeller.data.coco_data_module import COCODataModule
 from q2l_labeller.pl_modules.query2label_train_module import Query2LabelTrainModule
 from q2l_labeller.data.dataset import SeaThruAugmentation
-pl.seed_everything(50)
+from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
+pl.seed_everything(40)
 torch.backends.cudnn.benchmark = True
+import os 
 
+# log_dir = "training/logs/depthJitter"
+# os.makedirs(log_dir, exist_ok=True)  # Create the directory if it doesn't exist
 param_dict = {
-    "backbone_desc":"resnet50.a1_in1k",
+    "backbone_desc":"resnest101e",
     "conv_out_dim":2048,
     "hidden_dim":256,
     "num_encoders":2,
     "num_decoders":3,
     "num_heads":8,
-    "batch_size":512,
+    "batch_size":128,
     "image_dim":384,
     "learning_rate":1e-4,
     "momentum":0.9,
-    "weight_decay":0.01,
+    "weight_decay":1e-2,
     "n_classes":290,
-    "thresh":0.5,
+    "thresh":0.4,
     "use_cutmix":True,
-    "use_seathru":True,
     "use_pos_encoding":True,
     "loss":"ASL",
 }
@@ -36,16 +39,23 @@ image_folder = '/home/mundus/mrahman528/projects/mir/depth_jitter/fathomnet_2023
 depth_image_folder = '/home/mundus/mrahman528/projects/mir/depth_jitter/fathomnet_2023_dataset/depth_vis_train'
 depth_npy_folder = '/home/mundus/mrahman528/projects/mir/depth_jitter/fathomnet_2023_dataset/depth_vis_train'
 seathru_parameters_path = '/home/mundus/mrahman528/Depth-Jitter/parameters_train.json'
-seathru_transform = SeaThruAugmentation(image_folder, depth_image_folder, depth_npy_folder, seathru_parameters_path)
+depth_variance_path = "/home/mundus/mrahman528/Depth-Jitter/depth_variance_fathomnet.json"
+# image_folder = "/home/mundus/mrahman528/thesis/thesis_paper/UTDAC2020"
+# depth_image_folder = "/home/mundus/mrahman528/thesis/thesis_paper/UTDAC2020/depth_train"
+# depth_npy_folder = "/home/mundus/mrahman528/thesis/thesis_paper/UTDAC2020/depth_train"
+# seathru_parameters_path = "/home/mundus/mrahman528/thesis/thesis_paper/parameters_train.json"
+
+seathru_transform = SeaThruAugmentation(image_folder, depth_image_folder, depth_npy_folder, seathru_parameters_path,depth_variance_path, threshold=7.5)
 
 coco = COCODataModule(
     data_dir="/home/mundus/mrahman528/projects/mir/depth_jitter/fathomnet_2023_dataset",
     img_size=384,
-    batch_size=512,
+    batch_size=128,
     num_workers=8,  # Adjust based on CPU cores
     use_cutmix=True,
     cutmix_alpha=1.0,
     train_classes=None,
+    sampling_strategy="oversample", # oversample, undersample, default
     augmentation_strategy="seathru",
     seathru_transform=seathru_transform
 )
@@ -53,26 +63,49 @@ coco = COCODataModule(
 param_dict["data"] = coco
 
 pl_model = Query2LabelTrainModule(**param_dict)
-if hasattr(pl_model, "backbone"):
-    pl_model.backbone.freeze_backbone()
 
-#Comment out if not using wandb
+# Wandb Logger
 wandb_logger = WandbLogger(
-    project="DepthJitter", 
-    save_dir="training/depth-jitter",
-    log_model=True)
-wandb_logger.watch(pl_model, log="all")
-
-trainer = pl.Trainer(
-    max_epochs=50,
-    precision=16,
-    accelerator='gpu', 
-    devices='auto',  # Use all available GPUs
-    strategy='ddp',  # Use Distributed Data Parallel strategy
-    gradient_clip_val=0.5,  # Gradient clipping
-    logger=wandb_logger, # Comment out if not using wandb
-    default_root_dir="training/checkpoints/depth_jitter",
-    callbacks=[TQDMProgressBar(refresh_rate=100)],  # Reduce logging frequency
-    # profiler="simple"  # Profile to identify bottlenecks
+    project="depth_jitter-last-final",
+    save_dir="training/logs/depthJitter",
+    log_model=True,
+    id="resnest-DJ+all-ASL-Fathomnet-384",  # Unique experiment ID
+    sync_tensorboard=True  # Sync logs across GPUs
 )
+
+# Model Checkpoint Callback
+checkpoint_callback = ModelCheckpoint(
+    monitor="val_mAP",
+    dirpath="training/checkpoints/depth_jitter",
+    filename="best-checkpoint-{epoch:02d}-{val_mAP:.2f}",
+    save_top_k=1,
+    mode="min"
+)
+early_stopping_callback = EarlyStopping(
+    monitor="val_mAP",
+    patience=30,  # Number of epochs with no improvement
+    verbose=True,
+    mode="min"
+)
+# Trainer Configuration
+trainer = pl.Trainer(
+    max_epochs=200,
+    precision=16,
+    accelerator='gpu',
+    devices='auto',
+    strategy='ddp',
+    gradient_clip_val=0.1,
+    logger=wandb_logger,
+    default_root_dir="training/checkpoints/depth_jitter",
+    callbacks=[
+        TQDMProgressBar(refresh_rate=100),
+        checkpoint_callback
+    ],
+    accumulate_grad_batches=4,
+    detect_anomaly=True,
+    profiler="simple"  # Use advanced profiling if needed
+)
+
+# Start Training
 trainer.fit(pl_model, param_dict["data"])
+
