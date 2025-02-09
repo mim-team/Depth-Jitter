@@ -1,6 +1,6 @@
 # Depth-Jitter
 <p align="center">
-  <img src="assets/depthjitter.gif" width="500">
+  <img src="assets/depthjitter.gif">
 </p>
 
 ## Overview
