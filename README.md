@@ -1,6 +1,4 @@
-<p align="center">
-  <h1>Depth-Jitter</h1>
-</p>
+<h1 align="center">Depth-Jitter</h1>
 
 <p align="center">
   <strong>Author:</strong> Md Sazidur Rahman, Ricard Marxer, David Cabecinhas  
