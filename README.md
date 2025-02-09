@@ -26,9 +26,11 @@ By integrating depth-aware augmentation, Depth-Jitter improves model generalizat
 ## Depth Jitter Equation
 
 To model depth-aware augmentation, we introduce the following equation:
+
 <p align="center">
   <img src="assets/equation.png" alt="Alt Text" width="500"/>
 </p>
+
 In this equation, \( \Delta z_m \) represents the depth offset added to the original depth map. By incorporating this offset, we generate **synthetic data with depth variations**, which serves as an effective **data augmentation strategy**. This method enhances the model’s robustness to varying **color and depth conditions**, particularly in **underwater environments** where visibility and illumination vary significantly.
 
 By applying depth offsets during training, the model learns to generalize across different visibility settings, leading to **improved adaptability in real-world scenarios**.
@@ -36,21 +38,33 @@ By applying depth offsets during training, the model learns to generalize across
 ## Project Structure
 
 ```
+.
 ├── README.md
 ├── assets
-│   └── project_video.mp4
-├── parameters_train.json (seathru parameters)
+│   ├── depth-jitter-white.png
+│   ├── equation.png
+│   ├── project_video.mp4
+│   └── seathru.png
+├── depth_variance_fathomnet.json
+├── depth_variance_utdac.json
+├── environment.yml
+├── output-fathomnet.png
+├── output-utdac.png
+├── parameters_train.json
 ├── q2l_labeller
-│   ├── __init__.py
-│   ├── __pycache__
-│   ├── data (contains custom augmentation file dataset.py)
-│   ├── loss_modules
-│   ├── models
-│   └── pl_modules
-├── simple-demo.ipynb (training notebook)
-├── train.json (annotaiton)
-├── train_q2l.py (training script)
-└── val.json (annotation)
+│   ├── __init__.py
+│   ├── __pycache__
+│   ├── data
+│   ├── loss_modules
+│   ├── models
+│   └── pl_modules
+├── simple-demo.ipynb
+├── train.json
+├── train_fathomnet.json
+├── train_q2l.py
+├── val.json
+├── val_fathomnet.json
+
 ```
 ## Usage
 ### Create Conda Environment
