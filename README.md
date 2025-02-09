@@ -94,6 +94,11 @@ conda activate depth-jitter
 python train_q2l.py --dataset FathomNet
 
 ```
+### Jupyter Notebook
+```
+A Jupyter Notebook is provided for a more user-friendly and interactive experience with the code.  
+
+```
 
 ### If you want to change augmentation settings
 You can tweak the augmentation settings and the image size in this part of the training script. 
@@ -142,3 +147,10 @@ param_dict = {
     "data": coco
 }
 ```
+
+### Inference Images
+```
+python inference.py --image path/to/image.jpg --checkpoint path/to/model.ckpt --num_classes <number of classes>
+
+```
+
