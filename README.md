@@ -105,6 +105,13 @@ conda activate depth-jitter
 python train_q2l.py --dataset FathomNet
 
 ```
+
+### Train on SLURM Server
+If you are on a slurm server, You can use the [slurm script](depth_jitter.slurm) to train the model on multiple gpus.  
+```
+sbatch depthjitter.slurm
+```
+
 ### Jupyter Notebook
 
 A [Jupyter Notebook](simple-demo.ipynb) is provided for a more user-friendly and interactive experience with the code.  
