@@ -151,6 +151,19 @@ param_dict = {
 python inference.py --image path/to/image.jpg --checkpoint path/to/model.ckpt --num_classes <number of classes>
 
 ```
+### Train your own dataset
+If you want to train your own dataset, you need to follow couple of steps. The steps are given as follows
+#### Step - 1
+Get the depth images and the depth parameters using any state of the art RGB to depth model. We used [Depth Anything v2](https://github.com/DepthAnything/Depth-Anything-V2) for our dataset. 
+#### Step - 2 
+Get the seathru parameters of the images using [gaussian seathru](https://github.com/clementinboittiaux/sucre/blob/vignetting/src/gaussian_seathru.py) script from Sucre. You will need depth images for getting the parameters. 
+#### Step - 3
+Now you will need to get the depth variance threshold for your dataset and the depth_variance.json file. You can get them from the [jupyter notebook](simple-demo.ipynb). 
+#### Step - 4
+Ensure that your dataset annotations are formatted in the COCO JSON format before proceeding.
+#### Step - 5
+Now that you have everything, you can now proceed to train the multilabel classification model with our proposed augmentation technique. 
+
 
 ## 📖 Citation
 
