@@ -1,4 +1,8 @@
 # Depth-Jitter
+<p align="center">
+  <img src="assets/depthjitter.gif" width="500">
+</p>
+
 ## Overview
 Depth-Jitter is an advanced image augmentation project designed to enhance datasets by incorporating depth information. This repository provides a suite of tools for **depth-aware image processing**, **data augmentation**, and **model training**, allowing researchers to improve model robustness, particularly in depth-dependent applications such as **underwater imaging, autonomous navigation, and 3D reconstruction**.
 
