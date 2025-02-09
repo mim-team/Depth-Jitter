@@ -73,7 +73,7 @@ By applying depth offsets during training, the model learns to generalize across
 ## Usage
 ### Clone the repository
 ```
-git clone [text](https://github.com/mim-team/Depth-Jitter.git) 
+git clone https://github.com/mim-team/Depth-Jitter.git
 
 cd Depth-Jitter/
 ```
@@ -115,7 +115,7 @@ coco = COCODataModule(
 
 ### Model Settings
 You can change the model backbone and hyperparameters in this section of the training script. 
-If you want to use different backbones you can use them from timm [text](https://huggingface.co/docs/timm/en/results)
+If you want to use different backbones you can use them from [timm](https://huggingface.co/docs/timm/en/results)
 
 If you use a different backbone, please make sure to change the backbone_desc and conv_out_dims according to the models. 
 
