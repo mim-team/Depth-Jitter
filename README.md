@@ -159,7 +159,7 @@ param_dict = {
     "thresh": 0.4,
     "use_cutmix": True,
     "use_pos_encoding": True,
-    "loss": "ASL",
+    "loss": "ASL", # ASL, BCE
     "data": coco
 }
 ```
