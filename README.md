@@ -155,30 +155,42 @@ param_dict = {
 python inference.py --image path/to/image.jpg --checkpoint path/to/model.ckpt --num_classes <number of classes>
 
 ```
-### Train your own dataset
-```
-If you want to train your own dataset, you need to follow couple of steps. The steps are given as follows
-```
-#### Step - 1
-```
-Get the depth images and the depth parameters using any state of the art RGB to depth model. We used [Depth Anything v2](https://github.com/DepthAnything/Depth-Anything-V2) for our dataset. 
-```
-#### Step - 2 
-```
-Get the seathru parameters of the images using [gaussian seathru](https://github.com/clementinboittiaux/sucre/blob/vignetting/src/gaussian_seathru.py) script from Sucre. You will need depth images for getting the parameters. 
-```
-#### Step - 3
-```
-Now you will need to get the depth variance threshold for your dataset and the depth_variance.json file. You can get them from the [jupyter notebook](simple-demo.ipynb). 
-```
-#### Step - 4
-```
-Ensure that your dataset annotations are formatted in the COCO JSON format before proceeding.
-```
-#### Step - 5
-```
-Now that you have everything, you can now proceed to train the multilabel classification model with our proposed augmentation technique. 
-```
+## 🏋️ Train Your Own Dataset
+
+If you want to train your own dataset, follow these steps:
+
+### **📌 Step 1: Generate Depth Images**
+Get the **depth images** and **depth parameters** using any state-of-the-art **RGB-to-Depth** model.  
+We used **[Depth Anything v2](https://github.com/DepthAnything/Depth-Anything-V2)** for our dataset.  
+
+---
+
+### **📌 Step 2: Extract Seathru Parameters**
+Use **[Gaussian Seathru](https://github.com/clementinboittiaux/sucre/blob/vignetting/src/gaussian_seathru.py)** (from **Sucre**) to obtain **seathru parameters**.  
+📌 **Note:** You will need the **depth images** from Step 1 for this process.  
+
+---
+
+### **📌 Step 3: Compute Depth Variance Threshold**
+To determine the **depth variance threshold** and generate the `depth_variance.json` file:  
+📌 Use the **[Jupyter Notebook](simple-demo.ipynb)** provided in this repository.  
+
+---
+
+### **📌 Step 4: Prepare Annotations in COCO Format**
+Ensure that your dataset **annotations** are formatted in **COCO JSON format** before proceeding.  
+📌 Refer to the [COCO Dataset Guide](https://cocodataset.org/#format-data) if needed.  
+
+---
+
+### **📌 Step 5: Train Your Model with Depth-Jitter**
+Now that you have all the required data, you can **train your multi-label classification model**  
+using our **proposed augmentation technique**! 🎯  
+
+```sh
+# Example command to train your dataset
+python train.py --dataset YourDataset
+
 
 ## Acknowledgement
 First and foremost, I would like to express my deepest gratitude to my supervisor, **Professor Dr. Ricard Marxer**, for his continuous support, guidance, and encouragement throughout this research. His insightful feedback and unwavering belief in my capabilities have been invaluable to the completion of this work. I am also profoundly grateful to my co-supervisor, **Dr. David Cabecinhas**, for his expertise, patience, and constructive criticism, which have significantly contributed to the quality and direction of this research. I extend my sincere thanks to the **LIS Lab** at **Université de Toulon** for providing the financial support and resources necessary for this research. The funding and facilities offered by the LIS Lab have been instrumental in facilitating my experiments and enabling me to pursue my research objectives. Additionally, I acknowledge the faculty and staff of **Université de Toulon** and **Instituto Superior Técnico** for their support and assistance during my studies. Special thanks to my colleagues and friends for providing a stimulating and supportive environment in which to learn and grow.
