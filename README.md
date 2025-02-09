@@ -71,6 +71,12 @@ By applying depth offsets during training, the model learns to generalize across
 
 ```
 ## Usage
+### Clone the repository
+```
+git clone [text](https://github.com/mim-team/Depth-Jitter.git) 
+
+cd Depth-Jitter/
+```
 ### Create Conda Environment
 ```
 conda env create -f environment.yml
@@ -80,4 +86,58 @@ conda env create -f environment.yml
 ```
 conda activate depth-jitter
 
+```
+
+### train with desired dataset
+```
+python train_q2l.py --dataset FathomNet
+
+```
+
+### If you want to change augmentation settings
+You can tweak the augmentation settings and the image size in this part of the training script. 
+```python
+# Initialize Data Module
+coco = COCODataModule(
+    data_dir=selected_dataset["image_folder"],
+    img_size=384,
+    batch_size=128,
+    num_workers=8,  # Adjust based on CPU cores
+    use_cutmix=True,
+    cutmix_alpha=1.0,
+    train_classes=None,
+    sampling_strategy="default",  # oversample, undersample, default
+    augmentation_strategy="seathru", # baseline, seathru, combined
+    num_classes=selected_dataset["num_classes"],
+    seathru_transform=seathru_transform
+)
+```
+
+### Model Settings
+You can change the model backbone and hyperparameters in this section of the training script. 
+If you want to use different backbones you can use them from timm [text](https://huggingface.co/docs/timm/en/results)
+
+If you use a different backbone, please make sure to change the backbone_desc and conv_out_dims according to the models. 
+
+```python
+
+param_dict = {
+    "backbone_desc": "resnest101e",
+    "conv_out_dim": 2048,
+    "hidden_dim": 256,
+    "num_encoders": 2,
+    "num_decoders": 3,
+    "num_heads": 8,
+    "batch_size": 128,
+    "image_dim": 384,
+    "learning_rate": 1e-4,
+    "momentum": 0.9,
+    "weight_decay": 1e-2,
+    "n_classes": selected_dataset["num_classes"],  # Dynamically assign class numbers
+    "thresh": 0.4,
+    "use_cutmix": True,
+    "use_pos_encoding": True,
+    "loss": "ASL",
+    "data": coco
+}
 ```
