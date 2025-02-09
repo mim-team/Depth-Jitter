@@ -152,18 +152,38 @@ python inference.py --image path/to/image.jpg --checkpoint path/to/model.ckpt --
 
 ```
 ### Train your own dataset
+```
 If you want to train your own dataset, you need to follow couple of steps. The steps are given as follows
+```
 #### Step - 1
+```
 Get the depth images and the depth parameters using any state of the art RGB to depth model. We used [Depth Anything v2](https://github.com/DepthAnything/Depth-Anything-V2) for our dataset. 
+```
 #### Step - 2 
+```
 Get the seathru parameters of the images using [gaussian seathru](https://github.com/clementinboittiaux/sucre/blob/vignetting/src/gaussian_seathru.py) script from Sucre. You will need depth images for getting the parameters. 
+```
 #### Step - 3
+```
 Now you will need to get the depth variance threshold for your dataset and the depth_variance.json file. You can get them from the [jupyter notebook](simple-demo.ipynb). 
+```
 #### Step - 4
+```
 Ensure that your dataset annotations are formatted in the COCO JSON format before proceeding.
+```
 #### Step - 5
+```
 Now that you have everything, you can now proceed to train the multilabel classification model with our proposed augmentation technique. 
+```
 
+## Acknowledgement
+First and foremost, I would like to express my deepest gratitude to my supervisor, Professor Dr. Ricard Marxer, for his continuous support, guidance, and encouragement throughout this research. His insightful feedback and unwavering belief in my capabilities have been invaluable to the completion of this work.
+
+I am also profoundly grateful to my co-supervisor, Dr. David Cabecinhas, for his expertise, patience, and constructive criticism, which have significantly contributed to the quality and direction of this research.
+
+I extend my sincere thanks to the LIS Lab at Université de Toulon for providing the financial support and resources necessary for this research. The funding and facilities offered by the LIS Lab have been instrumental in facilitating my experiments and enabling me to pursue my research objectives.
+
+Additionally, I acknowledge the faculty and staff of Université de Toulon and Instituto Superior Técnico for their support and assistance during my studies. Special thanks to my colleagues and friends for providing a stimulating and supportive environment in which to learn and grow.
 
 ## 📖 Citation
 
