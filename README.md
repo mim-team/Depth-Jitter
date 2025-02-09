@@ -177,13 +177,7 @@ Now that you have everything, you can now proceed to train the multilabel classi
 ```
 
 ## Acknowledgement
-First and foremost, I would like to express my deepest gratitude to my supervisor, Professor Dr. Ricard Marxer, for his continuous support, guidance, and encouragement throughout this research. His insightful feedback and unwavering belief in my capabilities have been invaluable to the completion of this work.
-
-I am also profoundly grateful to my co-supervisor, Dr. David Cabecinhas, for his expertise, patience, and constructive criticism, which have significantly contributed to the quality and direction of this research.
-
-I extend my sincere thanks to the LIS Lab at Université de Toulon for providing the financial support and resources necessary for this research. The funding and facilities offered by the LIS Lab have been instrumental in facilitating my experiments and enabling me to pursue my research objectives.
-
-Additionally, I acknowledge the faculty and staff of Université de Toulon and Instituto Superior Técnico for their support and assistance during my studies. Special thanks to my colleagues and friends for providing a stimulating and supportive environment in which to learn and grow.
+First and foremost, I would like to express my deepest gratitude to my supervisor, **Professor Dr. Ricard Marxer**, for his continuous support, guidance, and encouragement throughout this research. His insightful feedback and unwavering belief in my capabilities have been invaluable to the completion of this work. I am also profoundly grateful to my co-supervisor, **Dr. David Cabecinhas**, for his expertise, patience, and constructive criticism, which have significantly contributed to the quality and direction of this research. I extend my sincere thanks to the **LIS Lab** at **Université de Toulon** for providing the financial support and resources necessary for this research. The funding and facilities offered by the LIS Lab have been instrumental in facilitating my experiments and enabling me to pursue my research objectives. Additionally, I acknowledge the faculty and staff of **Université de Toulon** and **Instituto Superior Técnico** for their support and assistance during my studies. Special thanks to my colleagues and friends for providing a stimulating and supportive environment in which to learn and grow.
 
 ## 📖 Citation
 
