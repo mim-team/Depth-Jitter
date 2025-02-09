@@ -9,7 +9,7 @@
 #SBATCH -e /mundus/mrahman528/q2l_err_infer6.log
 #SBATCH --gres=gpu:a40-48:2
 
-cd Depth-Jitter
+#cd Depth-Jitter
 #source ~/miniconda3/etc/profile.d/conda.sh
 conda activate query2l
 python train_q2l.py --dataset FathomNet
