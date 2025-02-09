@@ -74,7 +74,8 @@ By applying depth offsets during training, the model learns to generalize across
 ### Clone the repository
 ```
 git clone https://github.com/mim-team/Depth-Jitter.git
-
+```
+```
 cd Depth-Jitter/
 ```
 ### Create Conda Environment
