@@ -154,3 +154,19 @@ python inference.py --image path/to/image.jpg --checkpoint path/to/model.ckpt --
 
 ```
 
+## 📖 Citation
+
+If you use **Depth-Jitter** in your work, please cite:
+
+**BibTeX**
+```bibtex
+@article{depth-jitter2025,
+  author  = {Rahman, Md Sazidur, Marxer Ricard, Cabecinhas David},
+  title   = {Depth-Jitter: Depth-Based Image Augmentation for Robust Model Training},
+  journal = {XX},
+  year    = {2025},
+  volume  = {XX},
+  number  = {XX},
+  pages   = {XXX-XXX},
+  doi     = {10.XXXX/XXXXX},
+}
