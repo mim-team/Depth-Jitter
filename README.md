@@ -26,11 +26,9 @@ By integrating depth-aware augmentation, Depth-Jitter improves model generalizat
 ## Depth Jitter Equation
 
 To model depth-aware augmentation, we introduce the following equation:
-$$
-\[
-\boldsymbol{I_{c_p}^{mod} = \left( I_{c_p}^{orig} - B_c (1 - e^{-\gamma_c z_p}) \right) e^{-\beta_c (\Delta z_m - z_p)} + B_c (1 - e^{-\gamma_c \Delta z_m})}
-\]
-$$
+<p align="center">
+  <img src="assets/equation.png" alt="Alt Text" width="500"/>
+</p>
 In this equation, \( \Delta z_m \) represents the depth offset added to the original depth map. By incorporating this offset, we generate **synthetic data with depth variations**, which serves as an effective **data augmentation strategy**. This method enhances the model’s robustness to varying **color and depth conditions**, particularly in **underwater environments** where visibility and illumination vary significantly.
 
 By applying depth offsets during training, the model learns to generalize across different visibility settings, leading to **improved adaptability in real-world scenarios**.
