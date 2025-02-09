@@ -1,23 +1,30 @@
 <h1 align="center">Depth-Jitter</h1>
 
 <p align="center">
-  <strong>Author:</strong> Md Sazidur Rahman, Ricard Marxer, David Cabecinhas  
+  <strong>Authors:</strong> Md Sazidur Rahman, Ricard Marxer, David Cabecinhas  
 </p>
+
 <p align="center">
-  <img src="assets/depthjitter.gif">
+  <img src="assets/depthjitter.gif" alt="Depth-Jitter GIF">
 </p>
 
-## Overview
-Depth-Jitter is an advanced image augmentation project designed to enhance datasets by incorporating depth information. This repository provides a suite of tools for **depth-aware image processing**, **data augmentation**, and **model training**, allowing researchers to improve model robustness, particularly in depth-dependent applications such as **underwater imaging, autonomous navigation, and 3D reconstruction**.
+---
 
-Key features of Depth-Jitter include:
-- **Depth-Based Augmentation**: Modifies image intensities based on depth information to simulate real-world conditions.
-- **Quantile-Based Thresholding**: Implements a data-driven thresholding technique to adaptively process images with varying depth distributions.
-- **Adaptive Depth Offsetting**: Introduces controlled variations using a randomized depth jitter technique.
-- **Multi-Dataset Support**: Designed to work with multiple datasets, including UTDAC2020 and FathomNet, with optimized depth thresholds.
-- **Seamless Integration**: Compatible with deep learning frameworks for model training and evaluation.
 
-By integrating depth-aware augmentation, Depth-Jitter improves model generalization and robustness, making it highly applicable to computer vision tasks in **low-visibility environments, robotics, and depth-aware object detection**.
+## 🚀 Overview
+**Depth-Jitter** is an advanced image augmentation framework that enhances datasets by incorporating **depth-aware transformations**.  
+It provides a set of tools for **depth-based image processing, data augmentation, and model training**, enabling improved **model robustness** for applications such as:
+
+- 🌊 **Underwater Imaging**  
+- 🤖 **Autonomous Navigation**  
+- 🏗 **3D Reconstruction & Robotics**  
+
+### **✨ Key Features**
+✅ **Depth-Based Augmentation** – Simulates real-world depth variations.  
+✅ **Quantile-Based Thresholding** – Adaptive thresholding for different depth distributions.  
+✅ **Adaptive Depth Offsetting** – Introduces controlled randomness for better robustness.  
+✅ **Multi-Dataset Support** – Works with **UTDAC2020** and **FathomNet** datasets.  
+✅ **Seamless Deep Learning Integration** – Ready for model training and evaluation.  
 
 
 ### Underwater Image Formation Model
@@ -43,7 +50,7 @@ In this equation, \( \Delta z_m \) represents the depth offset added to the orig
 
 By applying depth offsets during training, the model learns to generalize across different visibility settings, leading to **improved adaptability in real-world scenarios**.
 
-## Project Structure
+## 📂 Project Structure
 
 ```
 .
@@ -188,7 +195,7 @@ Now that you have all the required data, you can **train your multi-label classi
 using our **proposed augmentation technique**! 🎯  
 
 ```sh
-# Example command to train your dataset
+# Example command to train your dataset after fixing the paths in the training script.
 python train.py --dataset YourDataset
 
 
@@ -199,10 +206,10 @@ First and foremost, I would like to express my deepest gratitude to my superviso
 
 If you use **Depth-Jitter** in your work, please cite:
 
-**BibTeX**
+### **📄 BibTeX**
 ```bibtex
 @article{depth-jitter2025,
-  author  = {Rahman, Md Sazidur, Marxer Ricard, Cabecinhas David},
+  author  = {Md Sazidur Rahman, Ricard Marxer, David Cabecinhas},
   title   = {Depth-Jitter: Depth-Based Image Augmentation for Robust Model Training},
   journal = {XX},
   year    = {2025},
@@ -211,3 +218,4 @@ If you use **Depth-Jitter** in your work, please cite:
   pages   = {XXX-XXX},
   doi     = {10.XXXX/XXXXX},
 }
+
