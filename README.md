@@ -1,7 +1,13 @@
 <h1 align="center">Depth-Jitter: Seeing through the Depth</h1>
 
 <p align="center">
-  <strong>Authors:</strong> Md Sazidur Rahman, David Cabecinhas, Ricard Marxer 
+  <strong>Authors:</strong> Md Sazidur Rahman<sup>1,2</sup>, David Cabecinhas<sup>2</sup>, Ricard Marxer<sup>1</sup>
+</p>
+
+<p align="center">
+  <sup>1</sup>Université de Toulon, Aix Marseille Univ, CNRS, LIS, Toulon, France  
+  <br>
+  <sup>2</sup>Institute for Systems and Robotics, Instituto Superior Técnico, Lisbon, Portugal
 </p>
 
 <p align="center">
