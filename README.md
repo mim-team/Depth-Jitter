@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="assets/vis-1.png" alt="Depth-Jitter GIF">
+  <img src="assets/vis-gif.gif" alt="Depth-Jitter GIF">
 </p>
 
 ---
