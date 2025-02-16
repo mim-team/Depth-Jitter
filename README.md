@@ -1,4 +1,4 @@
-<h1 align="center">Depth-Jitter</h1>
+<h1 align="center">Depth-Jitter: Seeing through the Depth</h1>
 
 <p align="center">
   <strong>Authors:</strong> Md Sazidur Rahman, David Cabecinhas, Ricard Marxer 
