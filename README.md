@@ -92,6 +92,17 @@ By applying depth offsets during training, the model learns to generalize across
 Please follow the instructions from [here](https://github.com/fathomnet/fgvc-comp-2023/blob/main/demo_download.ipynb).
 ### UTDAC2020
 Download the dataset from this [link](https://drive.google.com/file/d/1avyB-ht3VxNERHpAwNTuBRFOxiXDMczI/view).
+### 📂 Dataset Folder Structure
+```
+.
+├── annotations
+│   ├── train.json
+│   ├── val.json
+├── Depth_images
+├── train_images
+├── val_images
+
+```
 ## Usage
 ### Clone the repository
 ```
