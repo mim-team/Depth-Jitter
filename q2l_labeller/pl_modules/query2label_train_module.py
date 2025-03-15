@@ -1,19 +1,57 @@
 import torch
 import torch.nn as nn
 import pytorch_lightning as pl
+
+# Import classification metrics with the new "task" API
+from torchmetrics.functional.classification import (
+    precision,
+    recall,
+    f1_score,
+    auroc,
+    average_precision,
+)
+# Retrieval metric (unchanged)
+from torchmetrics.functional import retrieval_average_precision
 from torch.optim.lr_scheduler import OneCycleLR
-from torchmetrics.classification import MultilabelPrecision, MultilabelRecall, MultilabelF1Score, MultilabelAccuracy
+
 import numpy as np
 import warnings
-from sklearn.metrics import average_precision_score
 
-from q2l_labeller.data.cutmix import CutMixCriterion
+warnings.filterwarnings("ignore")
+
+# Custom modules - adjust paths as needed
+from q2l_labeller.data.cutmix import CutMixCriterion,cutmix
 from q2l_labeller.loss_modules.simple_asymmetric_loss import AsymmetricLoss
 from q2l_labeller.loss_modules.TwoWayMultiLabelLoss import TwoWayLoss
 from q2l_labeller.models.query2label import Query2Label
 
-warnings.filterwarnings("ignore")
+###############################################################################
+# Utility function for custom mAP@k (ranking-based) computation
+###############################################################################
+def calculate_map_at_k(y_true, y_pred, k=20):
+    """Calculate mAP@k for multi-label classification."""
+    ap_scores = []
+    for true_labels, pred_scores in zip(y_true, y_pred):
+        # Sort by descending score and take top-k
+        top_k_indices = pred_scores.argsort()[-k:][::-1]
+        num_relevant = 0
+        ap_sum = 0.0
 
+        for i, idx in enumerate(top_k_indices):
+            if true_labels[idx] == 1:
+                num_relevant += 1
+                ap_sum += num_relevant / (i + 1)
+
+        if num_relevant > 0:
+            ap_scores.append(ap_sum / min(num_relevant, k))
+        else:
+            ap_scores.append(0.0)
+
+    return np.mean(ap_scores)
+
+###############################################################################
+# Main Lightning Module
+###############################################################################
 class Query2LabelTrainModule(pl.LightningModule):
     def __init__(
         self,
@@ -33,13 +71,18 @@ class Query2LabelTrainModule(pl.LightningModule):
         thresh=0.5,
         use_cutmix=False,
         use_pos_encoding=False,
+        use_seathru=False,
         loss="BCE",
-        dropout_rate=0.3
     ):
         super().__init__()
+
+        # Save init parameters
         self.save_hyperparameters(ignore=["model", "data"])
 
+        # Dataloaders / data module
         self.data = data
+
+        # Model
         self.model = Query2Label(
             model=backbone_desc,
             conv_out=conv_out_dim,
@@ -51,103 +94,123 @@ class Query2LabelTrainModule(pl.LightningModule):
             use_pos_encoding=use_pos_encoding,
         )
 
-        # Add dropout for regularization
-        self.dropout = nn.Dropout(dropout_rate)
-
-        # Loss functions
+        # Loss
         if loss == "BCE":
             self.base_criterion = nn.BCEWithLogitsLoss()
         elif loss == "ASL":
             self.base_criterion = AsymmetricLoss(gamma_neg=1, gamma_pos=0)
         elif loss == "mll":
             self.base_criterion = TwoWayLoss()
+        else:
+            raise ValueError(f"Unknown loss type: {loss}")
 
-        self.criterion = CutMixCriterion(self.base_criterion)
+        # Optionally wrap with CutMix
+        self.use_cutmix = use_cutmix
+        if use_cutmix:
+            self.criterion = CutMixCriterion(self.base_criterion)
+        else:
+            self.criterion = self.base_criterion
 
-        # Metrics
-        self.precision_metric = MultilabelPrecision(num_labels=n_classes, threshold=thresh, average="macro")
-        self.recall_metric = MultilabelRecall(num_labels=n_classes, threshold=thresh, average="macro")
-        self.f1_metric = MultilabelF1Score(num_labels=n_classes, threshold=thresh, average="macro")
-        self.accuracy_metric = MultilabelAccuracy(num_labels=n_classes, threshold=thresh)
+        # Threshold for metrics
+        self.thresh = thresh
 
-    def forward(self, x):
-        x = self.model(x)
-        return self.dropout(x)  # Apply dropout to the model output
+        # Number of classes
+        self.n_classes = n_classes
 
-    def calculate_map_at_k(self, y_true, y_pred, k=20):
-        """Calculate mean Average Precision at K (mAP@k) for multi-label classification."""
-        aps = []
-        for true_labels, pred_scores in zip(y_true, y_pred):
-            # Get top-k indices sorted by prediction confidence
-            top_k_indices = pred_scores.argsort()[-k:][::-1]
-            num_relevant = 0
-            ap_sum = 0
+    def forward(self, x, return_features=False):
+        return self.model(x, return_features=return_features)
 
-            for i, index in enumerate(top_k_indices):
-                if true_labels[index] == 1:
-                    num_relevant += 1
-                    ap_sum += num_relevant / (i + 1)
-
-            if num_relevant > 0:
-                aps.append(ap_sum / min(num_relevant, k))
-            else:
-                aps.append(0.0)
-
-        return np.mean(aps)
-
-    def calculate_map(self, y_true, y_pred):
-        """Calculate mean Average Precision (mAP) and class-wise AP using scikit-learn."""
-        aps = []
-        class_aps = {}
-        for label in range(y_true.shape[1]):
-            if np.sum(y_true[:, label]) > 0:  # Ensure there are positives for the class
-                ap = average_precision_score(y_true[:, label], y_pred[:, label])
-                aps.append(ap)
-                class_aps[f"class_{label}"] = ap
-            else:
-                class_aps[f"class_{label}"] = 0.0
-        return np.mean(aps), class_aps
-
-    def evaluate(self, batch, stage=None):
-        self.model.eval()
+    ###########################################################################
+    # 🚀 **Updated `evaluate()` Method with Only `ovr_` Metrics**
+    ###########################################################################
+    def evaluate(self, batch, stage: str = None):
         x, y = batch
-        y_hat = self(x)
+        y_hat = self(x)  # raw logits
 
         # Compute loss
-        loss = self.base_criterion(y_hat, y.type(torch.float))
+        loss = self.base_criterion(y_hat, y.float())
 
-        # Metrics
-        # precision = self.precision_metric(y_hat, y.type(torch.int))
-        # recall = self.recall_metric(y_hat, y.type(torch.int))
-        # f1_score = self.f1_metric(y_hat, y.type(torch.int))
-        # accuracy = self.accuracy_metric(y_hat, y.type(torch.int))
+        # Retrieval-based AP (ranking scenario)
+        rmap = retrieval_average_precision(y_hat, y.long())
 
-        # Compute mAP and mAP@20
-        y_hat_np = y_hat.sigmoid().detach().cpu().numpy()
+        # Compute overall (micro) classification metrics
+        ovr_prec = precision(y_hat, y.long(), task="multilabel", num_labels=self.n_classes, average="micro", threshold=self.thresh)
+        ovr_recall = recall(y_hat, y.long(), task="multilabel", num_labels=self.n_classes, average="micro", threshold=self.thresh)
+        ovr_f1 = f1_score(y_hat, y.long(), task="multilabel", num_labels=self.n_classes, average="micro", threshold=self.thresh)
+
+        # Compute AUROC & mAP
+        roc_auc = auroc(y_hat, y.long(), task="multilabel", num_labels=self.n_classes, average="micro")
+        mAP = average_precision(y_hat, y.long(), task="multilabel", num_labels=self.n_classes, average="micro")
+
+        # Custom mAP@20
+        y_hat_np = y_hat.detach().cpu().numpy()
         y_np = y.detach().cpu().numpy()
-        mAP, class_aps = self.calculate_map(y_np, y_hat_np)
-        map_at_20 = self.calculate_map_at_k(y_np, y_hat_np, k=20)
+        map_20 = calculate_map_at_k(y_np, y_hat_np, k=20)
 
-        if stage:
-            # Log overall metrics
+        # Log Metrics
+        if stage is not None:
             self.log(f"{stage}_loss", loss, prog_bar=True)
+            self.log(f"{stage}_rmap", rmap, prog_bar=True)
+            self.log(f"{stage}_ovr_prec", ovr_prec, prog_bar=True)
+            self.log(f"{stage}_ovr_recall", ovr_recall, prog_bar=True)
+            self.log(f"{stage}_ovr_f1", ovr_f1, prog_bar=True)
+            self.log(f"{stage}_roc_auc", roc_auc, prog_bar=True)
             self.log(f"{stage}_mAP", mAP, prog_bar=True)
-            self.log(f"{stage}_mAP@20", map_at_20, prog_bar=True)
+            self.log(f"{stage}_mAP@20", map_20, prog_bar=True)
 
+    ###########################################################################
+    # Training Step
+    ###########################################################################
+    # def training_step(self, batch, batch_idx):
+    #     x, y = batch
+    #     y_hat = self(x)
+
+    #     if self.use_cutmix:
+    #         if isinstance(y, tuple) and len(y) == 3:
+    #             loss = self.CutMixCriterion(y_hat, y)
+    #         else:
+    #             raise ValueError(f"❌ CutMix Expected (y1, y2, lam), but got {y}")
+    #     else:
+    #         loss = self.criterion(y_hat, y.float())
+
+    #     self.log("train_loss", loss)
+    #     return loss
     def training_step(self, batch, batch_idx):
-        self.model.train()
         x, y = batch
-        y_hat = self(x)
-        loss = self.base_criterion(y_hat, y.type(torch.float))
-        self.log("train_loss", loss, prog_bar=True)
+
+        # Apply CutMix augmentation conditionally
+        if self.use_cutmix:
+            # Apply CutMix augmentation (returns data and targets tuple)
+            x_mixed, targets = cutmix((x, y), alpha=1.0)  # Adjust alpha as needed
+            y_hat = self(x)
+
+            loss = self.criterion(y_hat, targets)  # targets is (y1, y2, lam)
+
+        else:
+            # Standard (no CutMix)
+            y_hat = self(x)
+            loss = self.base_criterion(y_hat, y.float())
+
+        self.log("train_loss", loss)
         return loss
 
+
+
+    ###########################################################################
+    # Validation Step
+    ###########################################################################
     def validation_step(self, batch, batch_idx):
         self.evaluate(batch, "val")
 
+    ###########################################################################
+    # Test Step
+    ###########################################################################
     def test_step(self, batch, batch_idx):
         self.evaluate(batch, "test")
 
+    ###########################################################################
+    # Optimizer and Learning Rate Scheduler
+    ###########################################################################
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(
             self.parameters(),
@@ -156,15 +219,18 @@ class Query2LabelTrainModule(pl.LightningModule):
             weight_decay=self.hparams.weight_decay,
         )
 
+        try:
+            steps_per_epoch = int(len(self.data.train_dataloader()))  # Ensure it's an integer
+        except TypeError:
+            raise ValueError("❌ Error: Could not determine steps_per_epoch, check train_dataloader().")
+
         lr_scheduler_dict = {
             "scheduler": OneCycleLR(
                 optimizer,
-                self.hparams.learning_rate,
+                max_lr=self.hparams.learning_rate,
                 epochs=self.trainer.max_epochs,
-                steps_per_epoch=len(self.data.train_dataloader()),
+                steps_per_epoch=steps_per_epoch,
                 anneal_strategy="cos",
-                div_factor=25,  # Start with a very small LR
-                final_div_factor=1e4,  # Reduce LR to a very small value
             ),
             "interval": "step",
         }

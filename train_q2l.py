@@ -11,15 +11,37 @@ from q2l_labeller.pl_modules.query2label_train_module import Query2LabelTrainMod
 from q2l_labeller.data.dataset import SeaThruAugmentation
 
 # Set random seed
-pl.seed_everything(40)
+pl.seed_everything(100)
 torch.backends.cudnn.benchmark = True
 
-# Argument Parser for Dynamic Dataset Selection
+# Argument Parser
 parser = argparse.ArgumentParser(description="Depth-Jitter Training Script")
+
+# Dataset Selection
 parser.add_argument(
     "--dataset", type=str, choices=["UTDAC2020", "FathomNet"], default="FathomNet",
     help="Select dataset: 'UTDAC2020' or 'FathomNet' (default: FathomNet)"
 )
+
+# Model Configuration Arguments
+parser.add_argument("--backbone", type=str, default="resnest101e", help="Model backbone architecture (default: resnest101e)")
+parser.add_argument("--conv_out_dim", type=int, default=2048, help="Convolutional output dimension (default: 2048)")
+parser.add_argument("--hidden_dim", type=int, default=256, help="Hidden layer dimension (default: 256)")
+parser.add_argument("--num_encoders", type=int, default=2, help="Number of encoder layers (default: 2)")
+parser.add_argument("--num_decoders", type=int, default=3, help="Number of decoder layers (default: 3)")
+parser.add_argument("--num_heads", type=int, default=8, help="Number of attention heads (default: 8)")
+parser.add_argument("--batch_size", type=int, default=128, help="Batch size for training (default: 128)")
+parser.add_argument("--img_size", type=int, default=384, help="Image size (default: 384)")
+parser.add_argument("--learning_rate", type=float, default=1e-4, help="Learning rate (default: 1e-4)")
+parser.add_argument("--momentum", type=float, default=0.9, help="Momentum for optimizer (default: 0.9)")
+parser.add_argument("--weight_decay", type=float, default=1e-2, help="Weight decay for optimizer (default: 1e-2)")
+parser.add_argument("--thresh", type=float, default=0.5, help="Threshold for classification (default: 0.4)")
+parser.add_argument("--loss", type=str, choices=["ASL", "BCE", "mll"], default="ASL", help="Loss function (default: ASL)")
+
+# New Arguments: Augmentation and Sampling Strategy
+parser.add_argument("--augmentation_strategy", type=str, choices=["baseline", "seathru", "combined","colorjitter"], default="seathru", help="Augmentation strategy: 'baseline', 'seathru', or 'combined' (default: seathru)")
+parser.add_argument("--sampling_strategy", type=str, choices=["default", "oversample", "undersample"], default="oversample", help="Sampling strategy: 'default', 'oversample', or 'undersample' (default: oversample)")
+
 args = parser.parse_args()
 
 # Dataset configurations
@@ -30,8 +52,9 @@ datasets = {
         "depth_npy_folder": "/home/mundus/mrahman528/thesis/thesis_paper/UTDAC2020/depth_train",
         "seathru_parameters_path": "/home/mundus/mrahman528/thesis/thesis_paper/parameters_train.json",
         "depth_variance_path": "/home/mundus/mrahman528/Depth-Jitter/depth_variance_utdac.json",
-        "threshold": 9.49,  # Precomputed threshold
-        "num_classes": 4
+        "threshold": 9.49,
+        "num_classes": 4,
+        "dataset":"UTDAC2020"
     },
     "FathomNet": {
         "image_folder": "/home/mundus/mrahman528/projects/mir/depth_jitter/fathomnet_2023_dataset",
@@ -39,8 +62,9 @@ datasets = {
         "depth_npy_folder": "/home/mundus/mrahman528/projects/mir/depth_jitter/fathomnet_2023_dataset/depth_vis_train",
         "seathru_parameters_path": "/home/mundus/mrahman528/Depth-Jitter/parameters_train.json",
         "depth_variance_path": "/home/mundus/mrahman528/Depth-Jitter/depth_variance_fathomnet.json",
-        "threshold": 3.66,  # Precomputed threshold
-        "num_classes": 290
+        "threshold": 3.66,
+        "num_classes": 290,
+        "dataset":"FathomNet"
     }
 }
 
@@ -54,42 +78,43 @@ seathru_transform = SeaThruAugmentation(
     selected_dataset["depth_npy_folder"],
     selected_dataset["seathru_parameters_path"],
     selected_dataset["depth_variance_path"],
-    threshold=selected_dataset["threshold"]
+    threshold=selected_dataset["threshold"],
+    dataset = selected_dataset["dataset"]
 )
 
 # Initialize Data Module
 coco = COCODataModule(
     data_dir=selected_dataset["image_folder"],
-    img_size=384,
-    batch_size=128,
-    num_workers=8,  # Adjust based on CPU cores
+    img_size=args.img_size,
+    batch_size=args.batch_size,
+    num_workers=8,
     use_cutmix=True,
     cutmix_alpha=1.0,
     train_classes=None,
-    sampling_strategy="oversample",  # oversample, undersample, default
-    augmentation_strategy="seathru",
+    sampling_strategy=args.sampling_strategy,
+    augmentation_strategy=args.augmentation_strategy,
     num_classes=selected_dataset["num_classes"],
     seathru_transform=seathru_transform
 )
 
 # Model Parameters (Updated n_classes Dynamically)
 param_dict = {
-    "backbone_desc": "resnest101e",
-    "conv_out_dim": 2048,
-    "hidden_dim": 256,
-    "num_encoders": 2,
-    "num_decoders": 3,
-    "num_heads": 8,
-    "batch_size": 128,
-    "image_dim": 384,
-    "learning_rate": 1e-4,
-    "momentum": 0.9,
-    "weight_decay": 1e-2,
-    "n_classes": selected_dataset["num_classes"],  # Dynamically assign class numbers
-    "thresh": 0.4,
+    "backbone_desc": args.backbone,
+    "conv_out_dim": args.conv_out_dim,
+    "hidden_dim": args.hidden_dim,
+    "num_encoders": args.num_encoders,
+    "num_decoders": args.num_decoders,
+    "num_heads": args.num_heads,
+    "batch_size": args.batch_size,
+    "image_dim": args.img_size,
+    "learning_rate": args.learning_rate,
+    "momentum": args.momentum,
+    "weight_decay": args.weight_decay,
+    "n_classes": selected_dataset["num_classes"],
+    "thresh": args.thresh,
     "use_cutmix": True,
     "use_pos_encoding": True,
-    "loss": "ASL",
+    "loss": args.loss,
     "data": coco
 }
 
@@ -98,16 +123,16 @@ pl_model = Query2LabelTrainModule(**param_dict)
 
 # WandB Logger
 wandb_logger = WandbLogger(
-    project="depth_jitter-last-final",
+    project=f"depth_jitter-experiment-06(ss)-{args.dataset}",
     save_dir="training/logs/depthJitter",
     log_model=True,
-    id=f"resnest-DJ+all-ASL-UTDAC-384",  # Unique experiment ID
+    id=f"{args.backbone}-{args.loss}-{args.dataset}-{args.augmentation_strategy}-{args.sampling_strategy}-{args.img_size}-exp09",
     sync_tensorboard=True
 )
 
 # Model Checkpoint Callback
 checkpoint_callback = ModelCheckpoint(
-    monitor="val_mAP",
+    monitor="val_mAP@20",
     dirpath=f"training/checkpoints/depth_jitter_{args.dataset}",
     filename="best-checkpoint-{epoch:02d}-{val_mAP:.2f}",
     save_top_k=1,
@@ -117,19 +142,19 @@ checkpoint_callback = ModelCheckpoint(
 # Early Stopping Callback
 early_stopping_callback = EarlyStopping(
     monitor="val_mAP",
-    patience=30,  # Number of epochs with no improvement
+    patience=30,
     verbose=True,
     mode="min"
 )
 
 # Trainer Configuration
 trainer = pl.Trainer(
-    max_epochs=200,
+    max_epochs=24,
     precision=16,
     accelerator="gpu",
     devices="auto",
     strategy="ddp",
-    gradient_clip_val=0.1,
+    # gradient_clip_val=0.5,
     logger=wandb_logger,
     default_root_dir=f"training/checkpoints/depth_jitter_{args.dataset}",
     callbacks=[
@@ -137,9 +162,9 @@ trainer = pl.Trainer(
         checkpoint_callback,
         early_stopping_callback
     ],
-    accumulate_grad_batches=4,
-    detect_anomaly=True,
-    profiler="simple"
+    # accumulate_grad_batches=4,
+    # detect_anomaly=True,
+    # profiler="simple"
 )
 
 # Start Training

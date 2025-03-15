@@ -10,6 +10,43 @@ from q2l_labeller.data.dataset import SeaThruAugmentation
 import numpy as np
 import random
 from torch.utils.data import WeightedRandomSampler
+import cv2
+from PIL import Image
+
+# 1. Define a custom CLAHE transform:
+class CLAHETransform:
+    def __init__(self, clip_limit=2.0, tile_grid_size=(8, 8)):
+        """
+        clip_limit: Threshold for contrast limiting.
+        tile_grid_size: Size of the grid for histogram equalization.
+        """
+        self.clip_limit = clip_limit
+        self.tile_grid_size = tile_grid_size
+        self.clahe = cv2.createCLAHE(clipLimit=self.clip_limit, tileGridSize=self.tile_grid_size)
+
+    def __call__(self, img):
+        """
+        Args:
+            img (PIL Image): Image to apply CLAHE on.
+        Returns:
+            PIL Image after CLAHE.
+        """
+        # Convert from PIL Image to numpy array
+        img_np = np.array(img)
+
+        # If it's a single-channel (grayscale) image:
+        if len(img_np.shape) == 2:
+            img_np = self.clahe.apply(img_np)
+        else:
+            # For color images, convert to LAB and apply CLAHE on the L channel only
+            lab = cv2.cvtColor(img_np, cv2.COLOR_RGB2LAB)
+            l, a, b = cv2.split(lab)
+            l = self.clahe.apply(l)
+            lab = cv2.merge((l, a, b))
+            img_np = cv2.cvtColor(lab, cv2.COLOR_LAB2RGB)
+
+        # Convert back to PIL Image
+        return Image.fromarray(img_np)
 
 def compute_sample_weights(labels):
     """
@@ -83,16 +120,32 @@ class COCODataModule(pl.LightningDataModule):
                 return transforms.Compose([
                     RandAugment(),
                     transforms.Resize((self.img_size, self.img_size)),
+                    transforms.ColorJitter(brightness=0.3, contrast=0.5, saturation=0.1, hue=0.1),
                     transforms.ToTensor(),
                     normalize,
                 ])(image)
 
             train_transforms = combined_transform
+        elif self.augmentation_strategy == "colorjitter":
+            print("🚀 ColorJitter Augmentation Initialized")
+            train_transforms = transforms.Compose([
+                transforms.Resize((self.img_size, self.img_size)),
+                transforms.ColorJitter(brightness=0.3, contrast=0.5, saturation=0.1, hue=0.1),
+                transforms.ToTensor(),
+                normalize,
+            ])
+        elif self.augmentation_strategy == "clahe":
+            print("🚀 CLAHE Augmentation Initialized")
+            train_transforms = transforms.Compose([
+                transforms.Resize((self.img_size, self.img_size)),
+                CLAHETransform(clip_limit=5.0, tile_grid_size=(8, 8)),  #CLAHE transform
+                transforms.ToTensor(),
+                normalize,
+            ])
         else:
             print("🚀 Baseline Augmentation Initialized")
             train_transforms = transforms.Compose([
                 transforms.Resize((self.img_size, self.img_size)),
-                transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
                 transforms.ToTensor(),
                 normalize,
             ])

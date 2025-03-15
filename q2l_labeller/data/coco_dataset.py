@@ -83,6 +83,7 @@ class CoCoDataset(data.Dataset):
 
         return image, torch.tensor(self.labels[index])
 
+
     def getCategoryList(self, item):
         """Extract category IDs from annotations."""
         return list(set(t["category_id"] for t in item))

@@ -17,7 +17,7 @@ def compute_I_without_J(I_orig, beta, z, z_mod, B, gamma):
     return I_mod
 
 class SeaThruAugmentation:
-    def __init__(self, image_folder, depth_image_folder, depth_npy_folder,seathru_parameters_path,depth_variance_path, mode='train', resize=(384, 384), threshold=9.49):
+    def __init__(self, image_folder, depth_image_folder, depth_npy_folder,seathru_parameters_path,depth_variance_path, mode='train', resize=(384, 384), threshold=9.49,dataset='FathomNet'):
         """
         Args:
             - `image_folder`: Path to original images.
@@ -36,6 +36,7 @@ class SeaThruAugmentation:
         self.depth_npy_folder = Path(depth_npy_folder)
         self.seathru_parameters_path = seathru_parameters_path
         self.depth_variance_path = depth_variance_path
+        self.dataset = dataset
         self.threshold = threshold
         self.mode = mode
         self.image_files = list(self.image_folder.glob('*.jpg'))
@@ -105,7 +106,8 @@ class SeaThruAugmentation:
         # depth_offset = random.uniform(-self.std_depth, self.std_depth * 2)
         depth_min = np.min(depth_data[depth_data > 0])  # Smallest valid depth
         depth_max = np.max(depth_data)
-        depth_offset = random.uniform(-0.8 * depth_min, 0.5 * depth_max)
+        # depth_offset = random.uniform(-0.8 * depth_min, 0.5 * depth_max)
+        depth_offset = random.uniform(-5,5)
 
         random_B = random.uniform(0, 0.4)
         random_betac = random.uniform(0, 0.04)
