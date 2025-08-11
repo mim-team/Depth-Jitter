@@ -1,8 +1,8 @@
 <h1 align="center">🌊 Depth-Jitter: Seeing Through the Depth</h1>
 <h3 align="center">Accepted at <a href="https://greatlakes25.oceansconference.org/">OCEANS 2025 - Great Lakes</a></h3>
 <p align="center">
-  <a href="[https://arxiv.org/abs/2508.06227]">📄 Paper</a> •
-  <a href="[https://github.com/mim-team/Depth-Jitter]">💻 Code</a>
+  <a href="https://arxiv.org/abs/2508.06227">📄 Paper</a> •
+  <a href="https://github.com/mim-team/Depth-Jitter">💻 Code</a>
 </p>
 
 <p align="center">
