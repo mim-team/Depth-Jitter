@@ -1,4 +1,9 @@
-<h1 align="center">Depth-Jitter: Seeing through the Depth</h1>
+<h1 align="center">🌊 Depth-Jitter: Seeing Through the Depth</h1>
+<h3 align="center">Accepted at <a href="https://greatlakes25.oceansconference.org/">OCEANS 2025 - Great Lakes</a></h3>
+<p align="center">
+  <a href="[https://arxiv.org/abs/2508.06227]">📄 Paper</a> •
+  <a href="[https://github.com/mim-team/Depth-Jitter]">💻 Code</a>
+</p>
 
 <p align="center">
   <strong>Authors:</strong> Md Sazidur Rahman<sup>1,2</sup>, David Cabecinhas<sup>2</sup>, Ricard Marxer<sup>1</sup>
@@ -238,14 +243,15 @@ If you use **Depth-Jitter** in your work, please cite:
 
 ### **📄 BibTeX**
 ```bibtex
-@article{depth-jitter2025,
-  author  = {Md Sazidur Rahman, Ricard Marxer, David Cabecinhas},
-  title   = {Depth-Jitter: Depth-Based Image Augmentation for Robust Model Training},
-  journal = {XX},
-  year    = {2025},
-  volume  = {XX},
-  number  = {XX},
-  pages   = {XXX-XXX},
-  doi     = {10.XXXX/XXXXX},
+@inproceedings{rahman2025depthjitter,
+  author    = {Md Sazidur Rahman and David Cabecinhas and Ricard Marxer },
+  title     = {Depth-Jitter: Seeing through the Depth},
+  booktitle = {Proceedings of the OCEANS 2025 Conference, Great Lakes},
+  year      = {2025},
+  address   = {Chicago, IL, USA},
+  month     = sep,
+  pages     = {XXX--XXX},
+  doi       = {10.XXXX/XXXXX}
 }
+
 
